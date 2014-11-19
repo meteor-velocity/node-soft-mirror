@@ -1,12 +1,11 @@
 /*jshint -W030 */
 /* global
- Velocity:true,
  DEBUG:true
  */
 
 DEBUG = !!process.env.VELOCITY_DEBUG;
 
-ProxyPacakgeSync = {};
+Velocity.ProxyPackageSync = {};
 
 (function () {
   'use strict';
@@ -16,7 +15,7 @@ ProxyPacakgeSync = {};
     return;
   }
   Meteor.startup(function () {
-    var _regeneratePackageJsDebounced = _.debounce(Meteor.bindEnvironment(ProxyPacakgeSync.regeneratePackageJs), 200);
+    var _regeneratePackageJsDebounced = _.debounce(Meteor.bindEnvironment(Velocity.ProxyPackageSync.regeneratePackageJs), 200);
     velocityFilesCursor.observe({
       added: _regeneratePackageJsDebounced,
       removed: _regeneratePackageJsDebounced
@@ -34,14 +33,18 @@ ProxyPacakgeSync = {};
 // Public Methods
 //
 
-  _.extend(ProxyPacakgeSync, {
+  _.extend(Velocity.ProxyPackageSync, {
     regeneratePackageJs: function () {
+
+      console.log('[proxy-package-sync]', 'Checking if package.js needs to be regenerated');
 
       var packageJsContent = _gePackageJsContent();
       if (_packageContentIdenticalToCurrentPackageJS(packageJsContent)) {
         DEBUG && console.log('[proxy-package-sync]', 'No changes to package.js file required');
         return;
       }
+
+      console.log('[proxy-package-sync]', 'Changes detected. Clearing package.js file and restarting');
       _createProxyPackageDirectory();
       _createSymlinkToTestsDirectory();
       _writePackageJsFile(packageJsContent);
@@ -114,9 +117,16 @@ ProxyPacakgeSync = {};
 
     var files = velocityFilesCursor.fetch();
     _.each(files, function (file) {
-      testFiles += '\t' + 'api.add_files("' + file.relativePath + '",' + _getTarget(file) + ');' + '\n';
+      if (!_isUnitTest(file)) {
+        testFiles += '\t' + 'api.add_files("' + file.relativePath + '",' + _getTarget(file) + ');' + '\n';
+      }
     });
     return testFiles;
+  }
+
+  function _isUnitTest (file) {
+    var unitTestFragment = path.join(path.sep, 'unit', path.sep);
+    return file.relativePath.indexOf(unitTestFragment) !== -1;
   }
 
   function _getTarget (file) {
