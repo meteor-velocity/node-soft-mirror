@@ -27,7 +27,7 @@ Package.on_use(function (api) {
   api.versionsFrom('METEOR@1.0');
 
   api.use([
-    'velocity:core@1.0.0-rc.4',
+    'velocity:core@1.0.0-rc.6',
     'velocity:shim@0.0.3',
     'velocity:test-proxy@0.0.1'
   ]);
@@ -35,13 +35,12 @@ Package.on_use(function (api) {
   api.addFiles('nodeMirror.js', SERVER);
   api.addFiles('mirrorClientCode.js', CLIENT);
 
-  _initializeTestProxy(api);
+  api.addFiles('testProxyPackage/sync.js', SERVER);
+  _initializeTestProxy();
 
 });
 
-function _initializeTestProxy (api) {
-
-  api.addFiles('proxyPackage/sync.js', 'server');
+function _initializeTestProxy () {
 
   if (!fs.existsSync(_getProxyPackage())) {
     return;
