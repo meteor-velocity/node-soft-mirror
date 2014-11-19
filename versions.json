@@ -82,11 +82,15 @@
     ],
     [
       "velocity:core",
-      "1.0.0-rc.5"
+      "1.0.0-rc.6"
     ],
     [
       "velocity:shim",
       "0.0.3"
+    ],
+    [
+      "velocity:test-proxy",
+      "0.0.1"
     ]
   ],
   "pluginDependencies": [],
