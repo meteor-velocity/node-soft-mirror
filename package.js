@@ -4,7 +4,7 @@
 Package.describe({
   name: 'velocity:node-soft-mirror',
   summary: 'A Node based soft-mirror for use by Velocity compatible test frameworks',
-  version: '0.0.2',
+  version: '0.0.3',
   git: 'https://github.com/meteor-velocity/node-soft-mirror.git',
   debugOnly: true
 });
@@ -29,7 +29,7 @@ Package.on_use(function (api) {
   api.use([
     'velocity:core@1.0.0-rc.6',
     'velocity:shim@0.0.3',
-    'velocity:test-proxy@0.0.1'
+    'velocity:test-proxy@0.0.4'
   ]);
 
   api.addFiles('nodeMirror.js', SERVER);
@@ -42,7 +42,7 @@ Package.on_use(function (api) {
 
 function _initializeTestProxy () {
 
-  if (!fs.existsSync(_getProxyPackage())) {
+  if (!fs.existsSync(_getProxyPackagePath())) {
     return;
   }
 
@@ -50,10 +50,9 @@ function _initializeTestProxy () {
   if (_allFilesPresent(currentPackageJS)) {
     return;
   }
-  console.log('clearing test-proxy package.js');
+  console.log('[proxy-package-sync] Resetting test-proxy package.js as files have been removed from the tests directory.');
   fs.unlinkSync(_getPackageJsFilePath());
-  fs.createReadStream(_getBlankPackageJsFilePath()).pipe(fs.createWriteStream(_getPackageJsFilePath()));
-
+  fs.writeFileSync(_getPackageJsFilePath(), _getBlankPackageJsFile());
 }
 
 function _allFilesPresent (currentPackageJS) {
@@ -61,6 +60,7 @@ function _allFilesPresent (currentPackageJS) {
   var files = _getFilesFromPackageJs(currentPackageJS);
   _.each(files, function (file) {
     if (!fs.existsSync(file)) {
+      console.log('[proxy-package-sync] Detected file removal', file);
       result = false;
     }
   });
@@ -80,17 +80,20 @@ function _getFilesFromPackageJs (currentPackageJS) {
 }
 
 function _getPackageJsFilePath () {
-  return path.join(_getProxyPackage(), 'package.js');
+  return path.join(_getProxyPackagePath(), 'package.js');
 }
 
-function _getBlankPackageJsFilePath () {
-  return path.join(_getProxyPackage(), 'blankPackage.js');
-}
-
-function _getProxyPackage () {
+function _getProxyPackagePath () {
   return path.join(_getPackagesPath(), 'tests-proxy');
 }
 
 function _getPackagesPath () {
   return path.join(process.env.PWD, 'packages');
+}
+
+function _getBlankPackageJsFile () {
+  return 'Package.describe({ name: "velocity:test-proxy", version: "0.0.4", debugOnly: true });\n' +
+    '\n' +
+    'Package.on_use(function (api) {\n' +
+    '});';
 }

@@ -42,6 +42,7 @@ DEBUG = !!process.env.VELOCITY_DEBUG;
      */
     start: function (options, environment) {
 
+      environment.PWD = process.env.PWD;
       var opts = {
         silent: true,
         cwd: process.env.PWD,
@@ -49,15 +50,15 @@ DEBUG = !!process.env.VELOCITY_DEBUG;
       };
 
       var mainJs = path.join(process.env.PWD, '.meteor', 'local', 'build', 'main.js');
-      DEBUG && console.log('Forking mirror at', opts.env.ROOT_URL);
+      DEBUG && console.log('[velocity-node-mirror] Forking mirror at', opts.env.ROOT_URL);
       var meteorProcess = child_process.fork(mainJs, opts);
-      DEBUG && console.log('Mirror process forked with pid', meteorProcess.pid);
+      DEBUG && console.log('[velocity-node-mirror] Mirror process forked with pid', meteorProcess.pid);
 
       meteorProcess.stdout.on('data', function (data) {
-        console.log('[velocity-mirror]', data.toString());
+        console.log('[velocity-node-mirror]', data.toString());
       });
       meteorProcess.stderr.on('data', function (data) {
-        console.error('[velocity-mirror]', data.toString());
+        console.error('[velocity-node-mirror]', data.toString());
       });
 
       Meteor.call('velocity/mirrors/init', {
@@ -75,9 +76,9 @@ DEBUG = !!process.env.VELOCITY_DEBUG;
   });
 
   Meteor.methods({
-    'velocity/mirrors/node-mirror/client-restarted': function() {
-      console.log('[node-mirror] Client restarted. Re-running tests');
-      Meteor.call('velocity/reset');
+    'velocity/mirrors/node-mirror/mirror-client-restarted': function() {
+      DEBUG && console.log('[node-mirror] Mirror client restarted.');
+      // perhaps here we should let client based frameworks to re-run?
     }
   });
 
@@ -88,17 +89,17 @@ DEBUG = !!process.env.VELOCITY_DEBUG;
    * @private
    */
   function _killKnownMirrors () {
-    DEBUG && console.log('Killing all mirrors');
+    DEBUG && console.log('[velocity-node-mirror] Killing all mirrors');
     VelocityMirrors.find({type: MIRROR_TYPE}).forEach(function (mirror) {
       // if for whatever reason PID is undefined, this kills the main meteor app
       if (mirror.pid) {
         try {
-          DEBUG && console.log('Checking if mirror with pid', mirror.pid, 'is running');
+          DEBUG && console.log('[velocity-node-mirror] Checking if mirror with pid', mirror.pid, 'is running');
           process.kill(mirror.pid, 0);
-          DEBUG && console.log('Mirror with pid', mirror.pid, 'is running. Killing...');
+          DEBUG && console.log('[velocity-node-mirror] Mirror with pid', mirror.pid, 'is running. Killing...');
           process.kill(mirror.pid, 'SIGTERM');
         } catch (e) {
-          DEBUG && console.log('Mirror with pid', mirror.pid, 'is not running. Ignoring', e.message);
+          DEBUG && console.log('[velocity-node-mirror] Mirror with pid', mirror.pid, 'is not running. Ignoring', e.message);
         }
       }
     });
