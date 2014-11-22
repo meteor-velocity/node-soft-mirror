@@ -146,11 +146,16 @@ Velocity.ProxyPackageSync = {};
 
   function _shouldIncludeInMirror (file) {
     // TODO extract these to come from regex or similar when the framework registers
-    return !_inUnitFolder(file);
+    return !_inUnitFolder(file) && !_inFeaturesFolder(file);
   }
 
   function _inUnitFolder (file) {
     var integrationTestFragment = path.join(path.sep, 'unit', path.sep);
+    return file.relativePath.indexOf(integrationTestFragment) !== -1;
+  }
+
+  function _inFeaturesFolder (file) {
+    var integrationTestFragment = path.join(path.sep, 'features', path.sep);
     return file.relativePath.indexOf(integrationTestFragment) !== -1;
   }
 

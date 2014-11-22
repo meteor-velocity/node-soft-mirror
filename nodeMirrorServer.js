@@ -14,7 +14,7 @@ DEBUG = !!process.env.VELOCITY_DEBUG;
 
     Meteor.methods({
       'node-mirror/restart-client': function() {
-        console.log('[mirror] client restart requested');
+        DEBUG && console.log('[mirror] client restart requested');
         // TODO get the client to restart by updating a collection here.
         // TODO speak to Jonas and Mike first
       }
@@ -87,10 +87,10 @@ DEBUG = !!process.env.VELOCITY_DEBUG;
       DEBUG && console.log('[velocity-node-mirror] Mirror process forked with pid', meteorProcess.pid);
 
       meteorProcess.stdout.on('data', function (data) {
-        console.log('[velocity-mirror]', data.toString());
+        DEBUG && console.log('[velocity-mirror]', data.toString());
       });
       meteorProcess.stderr.on('data', function (data) {
-        console.error('[velocity-mirror]', data.toString());
+        DEBUG && console.error('[velocity-mirror]', data.toString());
       });
 
       Meteor.call('velocity/mirrors/init', {

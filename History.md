@@ -1,3 +1,8 @@
+## v0.0.4 - v0.0.8
+
+Lots of release attempts trying to figure out issue with meteor packages and semvars. See:
+https://github.com/meteor/meteor/issues/3147
+
 ## v0.0.3
 
 * Improved test-proxy stability
