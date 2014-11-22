@@ -11,17 +11,49 @@ DEBUG = !!process.env.VELOCITY_DEBUG;
 
   if (process.env.NODE_ENV !== 'development' ||
     process.env.IS_MIRROR) {
+
+    Meteor.methods({
+      'node-mirror/restart-client': function() {
+        console.log('[mirror] client restart requested');
+        // TODO get the client to restart by updating a collection here.
+        // TODO speak to Jonas and Mike first
+      }
+    });
+
     return;
   }
 
   var _ = Npm.require('lodash'),
       child_process = Npm.require('child_process'),
       path = Npm.require('path'),
-      MIRROR_TYPE = 'node-soft-mirror';
+      MIRROR_TYPE = 'node-soft-mirror',
+      nodeMirrorsCursor = VelocityMirrors.find({type: MIRROR_TYPE});
 
   // init
   Meteor.startup(function initializeVelocity () {
+    DEBUG && console.log('[velocity-node-mirror] Server restarted.');
+
+    DEBUG && console.log('[velocity-node-mirror] Killing mirrors.');
     _killKnownMirrors();
+
+    DEBUG && console.log('[velocity-node-mirror] Restarting mirror clients.');
+    _restartMirrorClients();
+
+  });
+
+  function _restartMirrorClients() {
+    nodeMirrorsCursor.forEach(function (mirror) {
+      DEBUG && console.log('[node-mirror] Calling node-mirror/restart-client via DDP to', mirror.host);
+      DDP.connect(mirror.host).call('node-mirror/restart-client');
+    });
+  }
+
+  Meteor.methods({
+    'velocity/mirrors/node-mirror/restart-mirror-clients': function () {
+      // the main process just restarted, so let's tell the mirror to restart too
+      DEBUG && console.log('[node-mirror] Main client restarted.');
+      _restartMirrorClients();
+    }
   });
 
   _.extend(Velocity.Mirror, {
@@ -55,16 +87,17 @@ DEBUG = !!process.env.VELOCITY_DEBUG;
       DEBUG && console.log('[velocity-node-mirror] Mirror process forked with pid', meteorProcess.pid);
 
       meteorProcess.stdout.on('data', function (data) {
-        console.log('[velocity-node-mirror]', data.toString());
+        console.log('[velocity-mirror]', data.toString());
       });
       meteorProcess.stderr.on('data', function (data) {
-        console.error('[velocity-node-mirror]', data.toString());
+        console.error('[velocity-mirror]', data.toString());
       });
 
       Meteor.call('velocity/mirrors/init', {
         mirrorId: opts.env.MIRROR_ID,
         port: opts.env.PORT,
         mongoUrl: opts.env.MONGO_URL,
+        host: opts.env.HOST,
         rootUrl: opts.env.ROOT_URL,
         type: MIRROR_TYPE
       }, {
@@ -75,22 +108,14 @@ DEBUG = !!process.env.VELOCITY_DEBUG;
     } // end velocityStartMirror
   });
 
-  Meteor.methods({
-    'velocity/mirrors/node-mirror/mirror-client-restarted': function() {
-      DEBUG && console.log('[node-mirror] Mirror client restarted.');
-      // perhaps here we should let client based frameworks to re-run?
-    }
-  });
-
-
-
   /**
    * Iterates through the mirrors collection and kills all processes if they are running
    * @private
    */
+
   function _killKnownMirrors () {
     DEBUG && console.log('[velocity-node-mirror] Killing all mirrors');
-    VelocityMirrors.find({type: MIRROR_TYPE}).forEach(function (mirror) {
+    nodeMirrorsCursor.forEach(function (mirror) {
       // if for whatever reason PID is undefined, this kills the main meteor app
       if (mirror.pid) {
         try {
