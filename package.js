@@ -15,8 +15,7 @@ Npm.depends({
 });
 
 var fs   = Npm.require('fs'),
-    path = Npm.require('path'),
-    _    = Npm.require('lodash');
+    path = Npm.require('path');
 
 Package.on_use(function (api) {
 
@@ -27,7 +26,7 @@ Package.on_use(function (api) {
   api.versionsFrom('METEOR@1.0');
 
   api.use([
-    'velocity:core@1.0.0-rc.8',
+    'velocity:core@0.4.1',
     'velocity:shim@0.0.3',
     'velocity:test-proxy@0.0.4'
   ]);
@@ -58,7 +57,7 @@ function _initializeTestProxy () {
 function _allFilesPresent (currentPackageJS) {
   var result = true;
   var files = _getFilesFromPackageJs(currentPackageJS);
-  _.each(files, function (file) {
+  files.forEach(function(file){
     if (!fs.existsSync(file)) {
       console.log('[proxy-package-sync] Detected file removal', file);
       result = false;
@@ -69,7 +68,7 @@ function _allFilesPresent (currentPackageJS) {
 
 function _getFilesFromPackageJs (currentPackageJS) {
   var absolutePaths = [];
-  _.each(currentPackageJS.split('\n'), function (line) {
+  currentPackageJS.split('\n').forEach(function (line) {
     if (line.indexOf('api.add_files') !== -1) {
       var relativePath = line.substring(line.indexOf('"') + 1, line.length);
       relativePath = relativePath.substring(0, relativePath.indexOf('"'));
