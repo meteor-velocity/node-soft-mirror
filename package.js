@@ -32,7 +32,6 @@ Package.on_use(function (api) {
   ]);
 
   api.addFiles('nodeMirrorServer.js', SERVER);
-  api.addFiles('nodeMirrorClient.js', CLIENT);
 
   api.addFiles('testProxyPackage/sync.js', SERVER);
   _initializeTestProxy();

@@ -11,15 +11,6 @@ DEBUG = !!process.env.VELOCITY_DEBUG;
 
   if (process.env.NODE_ENV !== 'development' ||
     process.env.IS_MIRROR) {
-
-    Meteor.methods({
-      'node-mirror/restart-client': function() {
-        DEBUG && console.log('[mirror] client restart requested');
-        // TODO get the client to restart by updating a collection here.
-        // TODO speak to Jonas and Mike first
-      }
-    });
-
     return;
   }
 
@@ -36,23 +27,9 @@ DEBUG = !!process.env.VELOCITY_DEBUG;
     DEBUG && console.log('[velocity-node-mirror] Killing mirrors.');
     _killKnownMirrors();
 
-    DEBUG && console.log('[velocity-node-mirror] Restarting mirror clients.');
-    _restartMirrorClients();
-
-  });
-
-  function _restartMirrorClients() {
-    nodeMirrorsCursor.forEach(function (mirror) {
-      DEBUG && console.log('[node-mirror] Calling node-mirror/restart-client via DDP to', mirror.host);
-      DDP.connect(mirror.host).call('node-mirror/restart-client');
-    });
-  }
-
-  Meteor.methods({
-    'velocity/mirrors/node-mirror/restart-mirror-clients': function () {
-      // the main process just restarted, so let's tell the mirror to restart too
-      DEBUG && console.log('[node-mirror] Main client restarted.');
-      _restartMirrorClients();
+    if (Package.autoupdate){
+      DEBUG && console.log("[velocity-node-mirror] Aggressively reload client");
+      Package.autoupdate.Autoupdate.autoupdateVersion = Random.id();
     }
   });
 
