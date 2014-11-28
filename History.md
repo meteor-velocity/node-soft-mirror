@@ -2,7 +2,7 @@
 
 * Removed pacakge.js regeneration on testfile/fixture removal
 * Added lots of debug logging
-
+* Using Velocity.startup instead of Meteor.startup
 
 ## v0.0.4 - v0.0.8
 
