@@ -20,7 +20,7 @@ Velocity.ProxyPackageSync = {};
       mkdirp = Npm.require('mkdirp'),
       _ = Npm.require('lodash');
 
-  Meteor.startup(function () {
+  Velocity.startup(function () {
     var _regeneratePackageJsDebounced = _.debounce(Meteor.bindEnvironment(Velocity.ProxyPackageSync.regeneratePackageJs), 200);
     VelocityTestFiles.find({}, {sort: {name: -1}}).observe({
       added: function(f) {
