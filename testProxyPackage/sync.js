@@ -15,22 +15,24 @@ Velocity.ProxyPackageSync = {};
     return;
   }
 
-  var velocityTestFilesCursor = VelocityTestFiles.find({}, {sort: {name: -1}}),
-      velocityFixtureFilesCursor = VelocityFixtureFiles.find({}, {sort: {name: -1}}),
-      path = Npm.require('path'),
+  var path = Npm.require('path'),
       fs = Npm.require('fs'),
       mkdirp = Npm.require('mkdirp'),
       _ = Npm.require('lodash');
 
   Meteor.startup(function () {
     var _regeneratePackageJsDebounced = _.debounce(Meteor.bindEnvironment(Velocity.ProxyPackageSync.regeneratePackageJs), 200);
-    velocityTestFilesCursor.observe({
-      added: _regeneratePackageJsDebounced,
-      removed: _regeneratePackageJsDebounced
+    VelocityTestFiles.find({}, {sort: {name: -1}}).observe({
+      added: function(f) {
+        DEBUG && console.log('[proxy-package-sync]', 'Test file added', f.relativePath);
+        _regeneratePackageJsDebounced();
+      }
     });
-    velocityFixtureFilesCursor.observe({
-      added: _regeneratePackageJsDebounced,
-      removed: _regeneratePackageJsDebounced
+    VelocityFixtureFiles.find({}, {sort: {name: -1}}).observe({
+      added: function(f) {
+        DEBUG && console.log('[proxy-package-sync]', 'Fixture added', f.relativePath);
+        _regeneratePackageJsDebounced();
+      }
     });
   });
 
@@ -42,18 +44,19 @@ Velocity.ProxyPackageSync = {};
   _.extend(Velocity.ProxyPackageSync, {
     regeneratePackageJs: function () {
 
-      DEBUG && console.log('[proxy-package-sync]', 'Checking if package.js needs to be regenerated');
+      DEBUG && console.log('[proxy-package-sync]', 'Checking if a new package.js needs to be written because', arguments, this);
 
-      var packageJsContent = _gePackageJsContent();
-      if (_packageContentIdenticalToCurrentPackageJS(packageJsContent)) {
+      var generatedPackageJsContent = _generatePackageJsContent();
+      if (_generatedPackageContentIdenticalToCurrentPackageJS(generatedPackageJsContent)) {
         DEBUG && console.log('[proxy-package-sync]', 'No changes to package.js file required');
         return;
       }
 
       DEBUG && console.log('[proxy-package-sync]', 'Changes detected. Clearing package.js file and restarting');
+
       _createProxyPackageDirectory();
       _createSymlinkToTestsDirectory();
-      _writePackageJsFile(packageJsContent);
+      _writePackageJsFile(generatedPackageJsContent);
     }
   });
 
@@ -61,14 +64,23 @@ Velocity.ProxyPackageSync = {};
 // Private Methods
 //
 
-  function _packageContentIdenticalToCurrentPackageJS (packageJsContent) {
+  function _generatedPackageContentIdenticalToCurrentPackageJS (generatedPackageJsContent) {
     if (!fs.existsSync(_getPackageJsFilePath())) {
       DEBUG && console.error('[proxy-package-sync]', 'package.js file does not exist');
       return false;
     }
     var currentPackageJS = fs.readFileSync(_getPackageJsFilePath()).toString();
 
-    return packageJsContent === currentPackageJS;
+    DEBUG && console.log('[proxy-package-sync] Comparing:');
+    DEBUG && console.log('[proxy-package-sync] - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -');
+    DEBUG && console.log('[proxy-package-sync] - - - - - - - - - currentPackageJS: - - - - - - - - - - - - -');
+    DEBUG && console.log(currentPackageJS);
+    DEBUG && console.log('[proxy-package-sync] - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -');
+    DEBUG && console.log('[proxy-package-sync] - - - - - - - - - generatedPackageJsContent - - - - - - - - -');
+    DEBUG && console.log(generatedPackageJsContent);
+    DEBUG && console.log('[proxy-package-sync] - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -');
+
+    return generatedPackageJsContent === currentPackageJS;
   }
 
   function _getPackageJsFilePath () {
@@ -97,7 +109,8 @@ Velocity.ProxyPackageSync = {};
     mkdirp.sync(testProxyPackageDir);
   }
 
-  function _gePackageJsContent () {
+  function _generatePackageJsContent () {
+    DEBUG && console.log('[proxy-package-sync] Generating in-memory package.js');
     return '' +
       'Package.describe({' + '\n' +
       '\t' + 'name: "velocity:test-proxy",' + '\n' +
@@ -114,10 +127,14 @@ Velocity.ProxyPackageSync = {};
 
   function _getTestFiles () {
     var packageJsTestFileEntries = '';
-    _.each(velocityTestFilesCursor.fetch(), function (testFile) {
+    var testFiles = VelocityTestFiles.find({}, {sort: {name: -1}}).fetch();
+    DEBUG && console.log('[proxy-package-sync] Test files list length: ', testFiles.length);
+    _.each(testFiles, function (testFile) {
       if (_shouldIncludeInMirror(testFile)) {
-        DEBUG && console.log('[proxy-package-sync] adding test file to package.js', testFile.relativePath);
+        DEBUG && console.log('[proxy-package-sync] Test file will be included in mirror', testFile.relativePath);
         packageJsTestFileEntries += '\t' + 'api.add_files("' + testFile.relativePath + '",' + _getTarget(testFile) + ');' + '\n';
+      } else {
+        DEBUG && console.log('[proxy-package-sync] Test file will not be included in mirror', testFile.relativePath);
       }
     });
     return packageJsTestFileEntries;
@@ -125,8 +142,10 @@ Velocity.ProxyPackageSync = {};
 
   function _getFixtureFiles () {
     var packageJsFixtureFileEntries = '';
-    _.each(velocityFixtureFilesCursor.fetch(), function (fixtureFile) {
-      DEBUG && console.log('[proxy-package-sync] adding fixture file to package.js', fixtureFile.relativePath);
+    var fixtureFiles = VelocityFixtureFiles.find({}, {sort: {name: -1}}).fetch();
+    DEBUG && console.log('[proxy-package-sync] Fixture files list length: ', fixtureFiles.length);
+    _.each(fixtureFiles, function (fixtureFile) {
+      DEBUG && console.log('[proxy-package-sync] Fixture file will be included in mirror', fixtureFile.relativePath);
       packageJsFixtureFileEntries += '\t' + 'api.add_files("' + fixtureFile.relativePath + '", ["server"]);' + '\n';
     });
     return packageJsFixtureFileEntries;

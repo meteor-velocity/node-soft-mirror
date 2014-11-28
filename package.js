@@ -4,7 +4,7 @@
 Package.describe({
   name: 'velocity:node-soft-mirror',
   summary: 'A Node based soft-mirror for use by Velocity compatible test frameworks',
-  version: '0.0.8',
+  version: '0.0.9',
   git: 'https://github.com/meteor-velocity/node-soft-mirror.git',
   debugOnly: true
 });
@@ -48,7 +48,7 @@ function _initializeTestProxy () {
   if (_allFilesPresent(currentPackageJS)) {
     return;
   }
-  console.log('[proxy-package-sync] Resetting test-proxy package.js as files have been removed from the tests directory.');
+  console.log('[proxy-package-sync-pre] Resetting test-proxy package.js as files have been removed from the tests directory.');
   fs.unlinkSync(_getPackageJsFilePath());
   fs.writeFileSync(_getPackageJsFilePath(), _getBlankPackageJsFile());
 }
@@ -58,7 +58,7 @@ function _allFilesPresent (currentPackageJS) {
   var files = _getFilesFromPackageJs(currentPackageJS);
   files.forEach(function(file){
     if (!fs.existsSync(file)) {
-      console.log('[proxy-package-sync] Detected file removal', file);
+      console.log('[proxy-package-sync-pre] Detected file removal', file);
       result = false;
     }
   });
