@@ -1,3 +1,9 @@
+## v0.0.9
+
+* Removed pacakge.js regeneration on testfile/fixture removal
+* Added lots of debug logging
+
+
 ## v0.0.4 - v0.0.8
 
 Lots of release attempts trying to figure out issue with meteor packages and semvars. See:
