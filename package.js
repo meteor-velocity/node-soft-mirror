@@ -4,7 +4,7 @@
 Package.describe({
   name: 'velocity:node-soft-mirror',
   summary: 'A Node based soft-mirror for use by Velocity compatible test frameworks',
-  version: '0.0.11',
+  version: '0.0.12',
   git: 'https://github.com/meteor-velocity/node-soft-mirror.git',
   debugOnly: true
 });
