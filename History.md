@@ -1,3 +1,9 @@
+## v0.1.0
+
+* CoffeeScript support
+* Fixtures are loaded before tests. Both are sorted ascending by path. (#7)
+* Symlink to tests folder is now relative (#5)
+
 ## v0.0.9
 
 * Removed pacakge.js regeneration on testfile/fixture removal
