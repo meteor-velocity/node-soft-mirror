@@ -128,7 +128,7 @@ Velocity.ProxyPackageSync = {};
 
   function _getTestFiles () {
     var packageJsTestFileEntries = '';
-    var testFiles = VelocityTestFiles.find({}, {sort: {name: -1}}).fetch();
+    var testFiles = VelocityTestFiles.find({}, {sort: {name: 1}}).fetch();
     DEBUG && console.log('[proxy-package-sync] Test files list length: ', testFiles.length);
     _.each(testFiles, function (testFile) {
       if (_shouldIncludeInMirror(testFile)) {
@@ -143,7 +143,7 @@ Velocity.ProxyPackageSync = {};
 
   function _getFixtureFiles () {
     var packageJsFixtureFileEntries = '';
-    var fixtureFiles = VelocityFixtureFiles.find({}, {sort: {name: -1}}).fetch();
+    var fixtureFiles = VelocityFixtureFiles.find({}, {sort: {name: 1}}).fetch();
     DEBUG && console.log('[proxy-package-sync] Fixture files list length: ', fixtureFiles.length);
     _.each(fixtureFiles, function (fixtureFile) {
       DEBUG && console.log('[proxy-package-sync] Fixture file will be included in mirror', fixtureFile.relativePath);
