@@ -22,13 +22,13 @@ Velocity.ProxyPackageSync = {};
 
   Velocity.startup(function () {
     var _regeneratePackageJsDebounced = _.debounce(Meteor.bindEnvironment(Velocity.ProxyPackageSync.regeneratePackageJs), 200);
-    VelocityTestFiles.find({}, {sort: {name: -1}}).observe({
+    VelocityTestFiles.find({}).observe({
       added: function(f) {
         DEBUG && console.log('[proxy-package-sync]', 'Test file added', f.relativePath);
         _regeneratePackageJsDebounced();
       }
     });
-    VelocityFixtureFiles.find({}, {sort: {name: -1}}).observe({
+    VelocityFixtureFiles.find({}).observe({
       added: function(f) {
         DEBUG && console.log('[proxy-package-sync]', 'Fixture added', f.relativePath);
         _regeneratePackageJsDebounced();
@@ -121,14 +121,26 @@ Velocity.ProxyPackageSync = {};
       '\n' +
       'Package.on_use(function (api) {' + '\n' +
       '\t' + 'api.use("coffeescript", ["client", "server"]);' + '\n' +
-      _getTestFiles() +
       _getFixtureFiles() +
+      _getTestFiles() +
       '});';
+  }
+
+  /**
+   * Sort case-insensitive by absoluteUrl
+   * @param files
+   * @returns {Array}
+   * @private
+   */
+  function _sortFiles (files) {
+    return _.sortBy(files, function (file) {
+      return file.absolutePath && file.absolutePath.toLowerCase()
+    });
   }
 
   function _getTestFiles () {
     var packageJsTestFileEntries = '';
-    var testFiles = VelocityTestFiles.find({}, {sort: {name: -1}}).fetch();
+    var testFiles = _sortFiles(VelocityTestFiles.find({}).fetch());
     DEBUG && console.log('[proxy-package-sync] Test files list length: ', testFiles.length);
     _.each(testFiles, function (testFile) {
       if (_shouldIncludeInMirror(testFile)) {
@@ -143,7 +155,7 @@ Velocity.ProxyPackageSync = {};
 
   function _getFixtureFiles () {
     var packageJsFixtureFileEntries = '';
-    var fixtureFiles = VelocityFixtureFiles.find({}, {sort: {name: -1}}).fetch();
+    var fixtureFiles = _sortFiles(VelocityFixtureFiles.find({}).fetch());
     DEBUG && console.log('[proxy-package-sync] Fixture files list length: ', fixtureFiles.length);
     _.each(fixtureFiles, function (fixtureFile) {
       DEBUG && console.log('[proxy-package-sync] Fixture file will be included in mirror', fixtureFile.relativePath);
