@@ -95,12 +95,12 @@ Velocity.ProxyPackageSync = {};
 
   function _createSymlinkToTestsDirectory () {
     var testProxyPackageDir = path.join(Velocity.getAppPath(), 'packages', 'tests-proxy'),
-        testProxyPackageTestsDir = path.join(testProxyPackageDir, 'tests');
+      testProxyPackageTestsDir = path.join(testProxyPackageDir, 'tests'),
+      relativeTestsPath = path.relative(testProxyPackageDir, Velocity.getTestsPath());
 
-    // FIXME use relative thing
     if (!fs.existsSync(testProxyPackageTestsDir)) {
       DEBUG && console.log('[proxy-package-sync]', 'creating symlink to tests directory');
-      fs.symlinkSync(Velocity.getTestsPath(), testProxyPackageTestsDir, 'dir');
+      fs.symlinkSync(relativeTestsPath, testProxyPackageTestsDir, 'dir');
     }
   }
 
