@@ -24,7 +24,6 @@ DEBUG = !!process.env.VELOCITY_DEBUG;
   Meteor.startup(function initializeVelocity () {
     DEBUG && console.log('[velocity-node-mirror] Server restarted.');
 
-    DEBUG && console.log('[velocity-node-mirror] Killing mirrors.');
     _killKnownMirrors();
 
     if (Package.autoupdate){
@@ -91,7 +90,7 @@ DEBUG = !!process.env.VELOCITY_DEBUG;
    */
 
   function _killKnownMirrors () {
-    DEBUG && console.log('[velocity-node-mirror] Killing all mirrors');
+    DEBUG && console.log('[velocity-node-mirror] Aggressively killing all mirrors');
     nodeMirrorsCursor.forEach(function (mirror) {
       // if for whatever reason PID is undefined, this kills the main meteor app
       if (mirror.pid) {
