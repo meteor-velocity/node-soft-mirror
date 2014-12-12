@@ -1,3 +1,7 @@
+## v0.2.0
+
+* Shiny new mirror updater
+
 ## v0.1.0
 
 * CoffeeScript support
