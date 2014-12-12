@@ -4,7 +4,7 @@
 Package.describe({
   name: 'velocity:node-soft-mirror',
   summary: 'A Node based soft-mirror for use by Velocity compatible test frameworks',
-  version: '0.1.0',
+  version: '0.2.0',
   git: 'https://github.com/meteor-velocity/node-soft-mirror.git',
   debugOnly: true
 });
@@ -20,17 +20,19 @@ var fs   = Npm.require('fs'),
 Package.on_use(function (api) {
 
   var SERVER = 'server',
-      CLIENT = 'client';
-  //  BOTH = [CLIENT, SERVER];
+      CLIENT = 'client',
+      BOTH = [CLIENT, SERVER];
 
   api.versionsFrom('METEOR@1.0');
 
   api.use([
     'velocity:core@0.4.1',
     'velocity:shim@0.1.0',
-    'velocity:test-proxy@0.0.4'
+    'velocity:test-proxy@0.0.4',
+    'mongo'
   ]);
 
+  api.addFiles('mirrorClientUpdater.js', BOTH);
   api.addFiles('nodeMirrorServer.js', SERVER);
 
   api.addFiles('testProxyPackage/sync.js', SERVER);
@@ -56,7 +58,7 @@ function _initializeTestProxy () {
 function _allFilesPresent (currentPackageJS) {
   var result = true;
   var files = _getFilesFromPackageJs(currentPackageJS);
-  files.forEach(function(file){
+  files.forEach(function (file) {
     if (!fs.existsSync(file)) {
       console.log('[proxy-package-sync-pre] Detected file removal', file);
       result = false;
