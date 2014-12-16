@@ -17,8 +17,7 @@ Velocity.ProxyPackageSync = {};
 
   var path = Npm.require('path'),
       fs = Npm.require('fs'),
-      mkdirp = Npm.require('mkdirp'),
-      _ = Npm.require('lodash');
+      mkdirp = Npm.require('mkdirp');
 
   Velocity.startup(function () {
     var _regeneratePackageJsDebounced = _.debounce(Meteor.bindEnvironment(Velocity.ProxyPackageSync.regeneratePackageJs), 200);

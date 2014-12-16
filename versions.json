@@ -69,6 +69,14 @@
       "1.0.1"
     ],
     [
+      "practicalmeteor:chai",
+      "1.9.2_3"
+    ],
+    [
+      "practicalmeteor:loglevel",
+      "1.1.0_3"
+    ],
+    [
       "random",
       "1.0.1"
     ],
@@ -86,7 +94,7 @@
     ],
     [
       "velocity:core",
-      "0.4.2"
+      "0.4.3"
     ],
     [
       "velocity:shim",

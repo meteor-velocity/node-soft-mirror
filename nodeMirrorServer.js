@@ -1,10 +1,13 @@
 /*jshint -W030 */
 /* global
  Velocity:true,
- DEBUG:true
+ DEBUG:true,
+ log: true,
+ sanjo:true
  */
 
 DEBUG = !!process.env.VELOCITY_DEBUG;
+log = loglevel.createPackageLogger('[node-soft-mirror]', process.env.VELOCITY_DEBUG ? 'DEBUG' : 'info');
 
 (function () {
   'use strict';
@@ -14,20 +17,21 @@ DEBUG = !!process.env.VELOCITY_DEBUG;
     return;
   }
 
-  var _ = Npm.require('lodash'),
-      child_process = Npm.require('child_process'),
-      path = Npm.require('path'),
+  DEBUG && console.error('[node-soft-mirror] adding server code');
+
+  var path = Npm.require('path'),
       MIRROR_TYPE = 'node-soft-mirror',
-      nodeMirrorsCursor = VelocityMirrors.find({type: MIRROR_TYPE});
+      nodeMirrorsCursor = VelocityMirrors.find({type: MIRROR_TYPE}),
+      _mirrorChildProcesses = {};
 
   // init
   Meteor.startup(function initializeVelocity () {
     DEBUG && console.log('[velocity-node-mirror] Server restarted.');
 
-    _killKnownMirrors();
+    _restartMirrors();
 
-    if (Package.autoupdate){
-      DEBUG && console.log("[velocity-node-mirror] Aggressively reload client");
+    if (Package.autoupdate) {
+      DEBUG && console.log('[node-soft-mirror] Aggressively reload client');
       Package.autoupdate.Autoupdate.autoupdateVersion = Random.id();
     }
   });
@@ -40,46 +44,53 @@ DEBUG = !!process.env.VELOCITY_DEBUG;
      * @param {Object} options not used in this mirror
      * @param {Object} environment Required fields:
      *                   ROOT_URL
-     *                   NODE_ENV
      *                   MIRROR_ID
      *                   PORT
      *                   MONGO_URL
-     *                   ROOT_URL
      *
      * @private
      */
     start: function (options, environment) {
 
-      environment.PWD = process.env.PWD;
-      var opts = {
-        silent: true,
-        cwd: process.env.PWD,
-        env: environment
-      };
-
       var mainJs = path.join(process.env.PWD, '.meteor', 'local', 'build', 'main.js');
-      DEBUG && console.log('[velocity-node-mirror] Forking mirror at', opts.env.ROOT_URL);
-      var meteorProcess = child_process.fork(mainJs, opts);
-      DEBUG && console.log('[velocity-node-mirror] Mirror process forked with pid', meteorProcess.pid);
 
-      meteorProcess.stdout.on('data', function (data) {
-        DEBUG && console.log('[velocity-mirror]', data.toString());
+      var mirrorChild = _getMirrorChild(environment.MIRROR_ID);
+      if (mirrorChild.isRunning()) {
+        return;
+      }
+
+      mirrorChild.spawn({
+        command: 'node',
+        args: [mainJs],
+        options: {
+          silent: true,
+          detached: true,
+          cwd: process.env.PWD,
+          env: _.defaults(environment, process.env)
+        }
       });
-      meteorProcess.stderr.on('data', function (data) {
-        DEBUG && console.error('[velocity-mirror]', data.toString());
-      });
+
+      DEBUG && console.log('[velocity-node-mirror] Mirror process forked with pid', mirrorChild.getChild().pid);
 
       Meteor.call('velocity/mirrors/init', {
-        mirrorId: opts.env.MIRROR_ID,
-        port: opts.env.PORT,
-        mongoUrl: opts.env.MONGO_URL,
-        host: opts.env.HOST,
-        rootUrl: opts.env.ROOT_URL,
+        framework: environment.FRAMEWORK,
+        mirrorId: environment.MIRROR_ID,
+        port: environment.PORT,
+        mongoUrl: environment.MONGO_URL,
+        host: environment.HOST,
+        rootUrl: environment.ROOT_URL,
+        rootUrlPath: environment.ROOT_URL_PATH,
         type: MIRROR_TYPE
       }, {
-        pid: meteorProcess.pid
+        pid: mirrorChild.pid
       });
 
+      mirrorChild.getChild().stdout.on('data', function (data) {
+        console.log('[velocity-mirror]', data.toString());
+      });
+      mirrorChild.getChild().stderr.on('data', function (data) {
+        console.error('[velocity-mirror]', data.toString());
+      });
 
     } // end velocityStartMirror
   });
@@ -89,23 +100,36 @@ DEBUG = !!process.env.VELOCITY_DEBUG;
    * @private
    */
 
-  function _killKnownMirrors () {
-    DEBUG && console.log('[velocity-node-mirror] Aggressively killing all mirrors');
+  function _restartMirrors () {
+    DEBUG && console.log('[velocity-node-mirror] Aggressively restarting all mirrors');
     nodeMirrorsCursor.forEach(function (mirror) {
-      // if for whatever reason PID is undefined, this kills the main meteor app
-      if (mirror.pid) {
-        try {
-          DEBUG && console.log('[velocity-node-mirror] Checking if mirror with pid', mirror.pid, 'is running');
-          process.kill(mirror.pid, 0);
-          DEBUG && console.log('[velocity-node-mirror] Mirror with pid', mirror.pid, 'is running. Killing...');
-          process.kill(mirror.pid, 'SIGTERM');
-        } catch (e) {
-          DEBUG && console.log('[velocity-node-mirror] Mirror with pid', mirror.pid, 'is not running. Ignoring', e.message);
-        }
+
+      var mirrorChild = _getMirrorChild(mirror.mirrorId);
+
+      if (mirrorChild.isRunning()) {
+        DEBUG && console.log('[node-soft-mirror] Restarting Mirror with id ' + mirror.mirrorId);
+        mirrorChild.kill();
+
+        Meteor.call('velocity/mirrors/request', {
+          framework: mirror.framework,
+          port: mirror.port,
+          rootUrlPath: mirror.rootUrlPath,
+          mirrorId: mirror.mirrorId
+        });
+
+      } else {
+        DEBUG && console.log('[node-soft-mirror] Mirror with id ' + mirror.mirrorId + ' is not running');
       }
     });
-    VelocityMirrors.remove({});
   }
 
+  function _getMirrorChild (id) {
+    var mirrorChild = _mirrorChildProcesses[id];
+    if (!mirrorChild) {
+      mirrorChild = new sanjo.LongRunningChildProcess(id);
+      _mirrorChildProcesses[id] = mirrorChild;
+    }
+    return mirrorChild;
+  }
 
 })();
