@@ -1,3 +1,11 @@
+## v0.2.4
+
+* Fixed bug: Package.js sync should not run when VELOCITY=0
+
+## v0.2.3
+
+* Removed mirrorId. Frameworks are now responsible for requesting multiple mirrors
+
 ## v0.2.2
 
 * Fixed infinite reload loop: https://github.com/mad-eye/meteor-mocha-web/issues/114
