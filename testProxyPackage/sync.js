@@ -1,6 +1,8 @@
 /*jshint -W030 */
 /* global
- DEBUG:true
+ DEBUG:true,
+ VelocityTestFiles: true,
+ VelocityFixtureFiles: true
  */
 
 DEBUG = !!process.env.VELOCITY_DEBUG;
@@ -10,7 +12,7 @@ Velocity.ProxyPackageSync = {};
 (function () {
   'use strict';
 
-  if (process.env.NODE_ENV !== 'development' || process.env.IS_MIRROR) {
+  if (process.env.NODE_ENV !== 'development' || process.env.IS_MIRROR || process.env.VELOCITY === '0') {
     DEBUG && console.log('[proxy-package-sync] ' + (process.env.IS_MIRROR ? 'Mirror detected - ' : '') + 'Not adding code');
     return;
   }
@@ -133,7 +135,7 @@ Velocity.ProxyPackageSync = {};
    */
   function _sortFiles (files) {
     return _.sortBy(files, function (file) {
-      return file.absolutePath && file.absolutePath.toLowerCase()
+      return file.absolutePath && file.absolutePath.toLowerCase();
     });
   }
 
