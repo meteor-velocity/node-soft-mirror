@@ -18,6 +18,12 @@ DEBUG = typeof process !== 'undefined' ? !!process.env.VELOCITY_DEBUG : false;
           return NodeSoftMirrorVars.find({});
         });
 
+        NodeSoftMirrorVars.allow({
+          remove: function() {
+            return true;
+          }
+        });
+
         Meteor.methods({
           'velocity/mirrors/node-soft-mirror/reloadClient': function () {
             DEBUG && console.log('[node-soft-mirror] reload requested, sending command to clients');
