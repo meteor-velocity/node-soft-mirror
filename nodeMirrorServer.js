@@ -44,7 +44,6 @@ log = loglevel.createPackageLogger('[node-soft-mirror]', process.env.VELOCITY_DE
      * @param {Object} options not used in this mirror
      * @param {Object} environment Required fields:
      *                   ROOT_URL
-     *                   MIRROR_ID
      *                   PORT
      *                   MONGO_URL
      *
@@ -54,7 +53,7 @@ log = loglevel.createPackageLogger('[node-soft-mirror]', process.env.VELOCITY_DE
 
       var mainJs = path.join(process.env.PWD, '.meteor', 'local', 'build', 'main.js');
 
-      var mirrorChild = _getMirrorChild(environment.MIRROR_ID);
+      var mirrorChild = _getMirrorChild(environment.FRAMEWORK);
       if (mirrorChild.isRunning()) {
         return;
       }
@@ -74,7 +73,6 @@ log = loglevel.createPackageLogger('[node-soft-mirror]', process.env.VELOCITY_DE
 
       Meteor.call('velocity/mirrors/init', {
         framework: environment.FRAMEWORK,
-        mirrorId: environment.MIRROR_ID,
         port: environment.PORT,
         mongoUrl: environment.MONGO_URL,
         host: environment.HOST,
@@ -104,30 +102,29 @@ log = loglevel.createPackageLogger('[node-soft-mirror]', process.env.VELOCITY_DE
     DEBUG && console.log('[velocity-node-mirror] Aggressively restarting all mirrors');
     nodeMirrorsCursor.forEach(function (mirror) {
 
-      var mirrorChild = _getMirrorChild(mirror.mirrorId);
+      var mirrorChild = _getMirrorChild(mirror.framework);
 
       if (mirrorChild.isRunning()) {
-        DEBUG && console.log('[node-soft-mirror] Restarting Mirror with id ' + mirror.mirrorId);
+        DEBUG && console.log('[node-soft-mirror] Restarting Mirror for framework ' + mirror.framework);
         mirrorChild.kill();
 
         Meteor.call('velocity/mirrors/request', {
           framework: mirror.framework,
           port: mirror.port,
-          rootUrlPath: mirror.rootUrlPath,
-          mirrorId: mirror.mirrorId
+          rootUrlPath: mirror.rootUrlPath
         });
 
       } else {
-        DEBUG && console.log('[node-soft-mirror] Mirror with id ' + mirror.mirrorId + ' is not running');
+        DEBUG && console.log('[node-soft-mirror] Mirror for framework ' + mirror.framework + ' is not running');
       }
     });
   }
 
-  function _getMirrorChild (id) {
-    var mirrorChild = _mirrorChildProcesses[id];
+  function _getMirrorChild (framework) {
+    var mirrorChild = _mirrorChildProcesses[framework];
     if (!mirrorChild) {
-      mirrorChild = new sanjo.LongRunningChildProcess(id);
-      _mirrorChildProcesses[id] = mirrorChild;
+      mirrorChild = new sanjo.LongRunningChildProcess(framework);
+      _mirrorChildProcesses[framework] = mirrorChild;
     }
     return mirrorChild;
   }
