@@ -1,3 +1,7 @@
+## v0.2.2
+
+* Fixed infinite reload loop: https://github.com/mad-eye/meteor-mocha-web/issues/114
+
 ## v0.2.0
 
 * Shiny new mirror updater
