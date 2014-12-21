@@ -12,11 +12,11 @@ schema.
 Reference this package in your frameworks package.js and then use something like this on the server:
 
 ```javascript
-var mirrorId = Meteor.call('velocity/mirrors/request', {
+ Meteor.call('velocity/mirrors/request', {
   framework: 'myFramework'
 });
 
-VelocityMirrors.find({_id: mirrorId, state: 'ready'}).observe({
+VelocityMirrors.find({framework: 'myFramework, state: 'ready'}).observe({
   added: watch,
   changed: watch
 });

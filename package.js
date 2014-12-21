@@ -4,7 +4,7 @@
 Package.describe({
   name: 'velocity:node-soft-mirror',
   summary: 'A Node based soft-mirror for use by Velocity compatible test frameworks',
-  version: '0.2.2',
+  version: '0.2.3',
   git: 'https://github.com/meteor-velocity/node-soft-mirror.git',
   debugOnly: true
 });
@@ -29,7 +29,7 @@ Package.on_use(function (api) {
     'mongo@1.0.9',
     'coffeescript@1.0.4',
     'underscore',
-    'velocity:core@0.4.1',
+    'velocity:core@0.4.5',
     'velocity:shim@0.1.0',
     'velocity:test-proxy@0.0.4'
   ]);
