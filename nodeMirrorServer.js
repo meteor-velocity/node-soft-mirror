@@ -17,7 +17,7 @@ log = loglevel.createPackageLogger('[node-soft-mirror]', process.env.VELOCITY_DE
     return;
   }
 
-  DEBUG && console.error('[node-soft-mirror] adding server code');
+  DEBUG && console.log('[node-soft-mirror] adding server code');
 
   var path = Npm.require('path'),
       MIRROR_TYPE = 'node-soft-mirror',
