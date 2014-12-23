@@ -67,7 +67,7 @@ Velocity.ProxyPackageSync = {};
 
   function _generatedPackageContentIdenticalToCurrentPackageJS (generatedPackageJsContent) {
     if (!fs.existsSync(_getPackageJsFilePath())) {
-      DEBUG && console.error('[proxy-package-sync]', 'package.js file does not exist');
+      DEBUG && console.log('[proxy-package-sync]', 'package.js file does not exist');
       return false;
     }
     var currentPackageJS = fs.readFileSync(_getPackageJsFilePath()).toString();
