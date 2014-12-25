@@ -1,3 +1,7 @@
+## v0.2.6
+
+* Locking down versions
+
 ## v0.2.5
 
 * Changed LongRunningChildProcess namespace as not to clash with meteor-karma runner
