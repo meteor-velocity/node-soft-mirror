@@ -84,13 +84,6 @@ log = loglevel.createPackageLogger('[node-soft-mirror]', process.env.VELOCITY_DE
         pid: mirrorChild.pid
       });
 
-      mirrorChild.getChild().stdout.on('data', function (data) {
-        console.log('[velocity-mirror]', data.toString());
-      });
-      mirrorChild.getChild().stderr.on('data', function (data) {
-        console.error('[velocity-mirror]', data.toString());
-      });
-
     } // end velocityStartMirror
   });
 
