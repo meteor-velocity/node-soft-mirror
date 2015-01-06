@@ -52,7 +52,8 @@ log = loglevel.createPackageLogger('[node-soft-mirror]', process.env.VELOCITY_DE
      */
     start: function (options, environment) {
 
-      var mainJs = path.join(process.env.PWD, '.meteor', 'local', 'build', 'main.js');
+      var appPath = _getAppPath();
+      var mainJs = path.join(appPath, '.meteor', 'local', 'build', 'main.js');
 
       var mirrorChild = _getMirrorChild(environment.FRAMEWORK);
       if (mirrorChild.isRunning()) {
@@ -60,12 +61,11 @@ log = loglevel.createPackageLogger('[node-soft-mirror]', process.env.VELOCITY_DE
       }
 
       mirrorChild.spawn({
-        command: 'node',
+        command: process.execPath,
         args: [mainJs],
         options: {
-          silent: true,
           detached: true,
-          cwd: process.env.PWD,
+          cwd: appPath,
           env: _.defaults(environment, process.env)
         }
       });
@@ -128,6 +128,10 @@ log = loglevel.createPackageLogger('[node-soft-mirror]', process.env.VELOCITY_DE
       _mirrorChildProcesses[framework] = mirrorChild;
     }
     return mirrorChild;
+  }
+
+  function _getAppPath () {
+    return path.resolve(findAppDir());
   }
 
 })();
