@@ -129,12 +129,12 @@ class sanjo1.LongRunningChildProcess
     @fout = fs.openSync(logFile, 'w')
     #@ferr = fs.openSync(logFile, 'w')
 
-    spawnOptions = options.options || {
+    spawnOptions = _.defaults(options.options, {
       cwd: @_getMeteorAppPath(),
       env: process.env,
       detached: true,
       stdio: ['ignore', @fout, @fout]
-    }
+    })
 
 
     command = path.basename options.command
@@ -146,7 +146,8 @@ class sanjo1.LongRunningChildProcess
 
     log.debug("LongRunningChildProcess.spawn is spawning '#{command}'")
 
-    @child = spawn('node', commandArgs, spawnOptions)
+    nodePath = process.execPath
+    @child = spawn(nodePath, commandArgs, spawnOptions)
     @dead = false
     @_setPid(@child.pid)
 
