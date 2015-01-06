@@ -3,9 +3,9 @@ path = Npm.require 'path'
 assert = Npm.require 'assert'
 spawn = Npm.require('child_process').spawn
 
-@sanjo ?= {}
+@sanjo1 ?= {}
 
-class sanjo.LongRunningChildProcess
+class sanjo1.LongRunningChildProcess
 
   taskName: null
   child: null

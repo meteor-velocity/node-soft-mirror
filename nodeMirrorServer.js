@@ -3,7 +3,8 @@
  Velocity:true,
  DEBUG:true,
  log: true,
- sanjo:true
+ sanjo1:true,
+ loglevel: true
  */
 
 DEBUG = !!process.env.VELOCITY_DEBUG;
@@ -123,7 +124,7 @@ log = loglevel.createPackageLogger('[node-soft-mirror]', process.env.VELOCITY_DE
   function _getMirrorChild (framework) {
     var mirrorChild = _mirrorChildProcesses[framework];
     if (!mirrorChild) {
-      mirrorChild = new sanjo.LongRunningChildProcess(framework);
+      mirrorChild = new sanjo1.LongRunningChildProcess(framework);
       _mirrorChildProcesses[framework] = mirrorChild;
     }
     return mirrorChild;

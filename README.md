@@ -16,13 +16,13 @@ Reference this package in your frameworks package.js and then use something like
   framework: 'myFramework'
 });
 
-VelocityMirrors.find({framework: 'myFramework, state: 'ready'}).observe({
+VelocityMirrors.find({framework: 'myFramework', state: 'ready'}).observe({
   added: watch,
   changed: watch
 });
 
 var watch = function (mirror) {
-  VelocityTestFiles.find({targetFramework: FRAMEWORK_NAME}).observe({
+  VelocityTestFiles.find({targetFramework: 'myFramework'}).observe({
     added: _doSomething,
     removed: _doSomething,
     changed: _doSomething
