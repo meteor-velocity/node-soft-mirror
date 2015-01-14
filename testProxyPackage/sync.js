@@ -95,10 +95,10 @@ Velocity.ProxyPackageSync = {};
     fs.writeFileSync(_getPackageJsFilePath(), packageJsContent);
   }
 
-  function _createSymlink (directory1, directory2) {
+  function _createSymlink (directory, path) {
     var testProxyPackageDir = path.join(Velocity.getAppPath(), 'packages', 'tests-proxy'),
-      testProxyPackageTestsDir = path.join(testProxyPackageDir, directory1),
-      relativeTestsPath = path.relative(testProxyPackageDir, directory2);
+      testProxyPackageTestsDir = path.join(testProxyPackageDir, directory),
+      relativeTestsPath = path.relative(testProxyPackageDir, path);
 
     if (!fs.existsSync(testProxyPackageTestsDir)) {
       DEBUG && console.log('[proxy-package-sync]', 'creating symlink to tests directory');
