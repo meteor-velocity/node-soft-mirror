@@ -56,7 +56,8 @@ Velocity.ProxyPackageSync = {};
       DEBUG && console.log('[proxy-package-sync]', 'Changes detected. Clearing package.js file and restarting');
 
       _createProxyPackageDirectory();
-      _createSymlinkToTestsDirectory();
+      _createSymlink('tests', Velocity.getTestsPath());
+      _createSymlink('packages', Velocity.getPackagesPath());
       _writePackageJsFile(generatedPackageJsContent);
     }
   });
@@ -94,10 +95,10 @@ Velocity.ProxyPackageSync = {};
     fs.writeFileSync(_getPackageJsFilePath(), packageJsContent);
   }
 
-  function _createSymlinkToTestsDirectory () {
+  function _createSymlink (directory, fullpath) {
     var testProxyPackageDir = path.join(Velocity.getAppPath(), 'packages', 'tests-proxy'),
-      testProxyPackageTestsDir = path.join(testProxyPackageDir, 'tests'),
-      relativeTestsPath = path.relative(testProxyPackageDir, Velocity.getTestsPath());
+      testProxyPackageTestsDir = path.join(testProxyPackageDir, directory),
+      relativeTestsPath = path.relative(testProxyPackageDir, fullpath);
 
     if (!fs.existsSync(testProxyPackageTestsDir)) {
       DEBUG && console.log('[proxy-package-sync]', 'creating symlink to tests directory');
