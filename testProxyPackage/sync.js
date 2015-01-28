@@ -121,7 +121,7 @@ Velocity.ProxyPackageSync = {};
       '\t' + 'debugOnly: true' + '\n' +
       '});' + '\n' +
       '\n' +
-      'Package.on_use(function (api) {' + '\n' +
+      'Package.onUse(function (api) {' + '\n' +
       '\t' + 'api.use("coffeescript", ["client", "server"]);' + '\n' +
       _getFixtureFiles() +
       _getTestFiles() +
