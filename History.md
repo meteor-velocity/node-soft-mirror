@@ -1,3 +1,9 @@
+## v0.3.0
+
+* Terminate mirror correctly in Meteor >= 1.0.3
+* Symlink packages directory in tests-proxy package
+* Remove deprecated API usage in generated package.js of tests-proxy
+
 ## v0.2.6
 
 * Locking down versions

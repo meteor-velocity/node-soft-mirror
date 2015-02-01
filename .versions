@@ -2,9 +2,9 @@ application-configuration@1.0.4
 base64@1.0.2
 binary-heap@1.0.2
 callback-hook@1.0.2
-check@1.0.3
+check@1.0.4
 coffeescript@1.0.5
-ddp@1.0.13
+ddp@1.0.14
 ejson@1.0.5
 follower-livedata@1.0.3
 geojson-utils@1.0.2
@@ -19,9 +19,9 @@ practicalmeteor:chai@1.9.2_3
 practicalmeteor:loglevel@1.1.0_3
 random@1.0.2
 retry@1.0.2
-tracker@1.0.4
+tracker@1.0.5
 underscore@1.0.2
 velocity:core@0.4.5
-velocity:node-soft-mirror@0.2.8
+velocity:node-soft-mirror@0.3.0
 velocity:shim@0.1.0
 velocity:test-proxy@0.0.4
