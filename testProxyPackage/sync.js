@@ -57,7 +57,9 @@ Velocity.ProxyPackageSync = {};
 
       _createProxyPackageDirectory();
       _createSymlink('tests', Velocity.getTestsPath());
-      _createSymlink('packages', Velocity.getPackagesPath());
+      // TODO: Upgrade velocity:core dependency when this is available
+      //       and activate the next line
+      //_createSymlink('packages', Velocity.getPackagesPath());
       _writePackageJsFile(generatedPackageJsContent);
     }
   });
