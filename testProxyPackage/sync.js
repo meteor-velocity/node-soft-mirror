@@ -115,7 +115,7 @@ Velocity.ProxyPackageSync = {};
 
   function _generatePackageJsContent () {
     DEBUG && console.log('[proxy-package-sync] Generating in-memory package.js');
-    return '' +
+    var content = '' +
       'Package.describe({' + '\n' +
       '\t' + 'name: "velocity:test-proxy",' + '\n' +
       '\t' + 'summary: "Dynamically created package to expose test files to mirrors",' + '\n' +
@@ -124,10 +124,30 @@ Velocity.ProxyPackageSync = {};
       '});' + '\n' +
       '\n' +
       'Package.onUse(function (api) {' + '\n' +
-      '\t' + 'api.use("coffeescript", ["client", "server"]);' + '\n' +
+      '\t' + 'api.use("coffeescript", ["client", "server"]);' + '\n';
+
+    // This is a hardcoded list because tests-proxy will be removed soon anyway.
+    var testingFrameworks = [
+      'sanjo:jasmine',
+      'mike:mocha',
+      'xolvio:cucumber',
+      'clinical:nightwatch',
+      'nblazer:casperjs',
+      'rsbatech:robotframework'
+    ]
+
+    // Depending weakly on the testing frameworks makes sure that
+    // the frameworks are loaded before the testing-proxy
+    testingFrameworks.forEach(function (testingFramework) {
+      content += '\t' + 'api.use("' + testingFramework + '", {weak: true});' + '\n';
+    });
+
+    content +=
       _getFixtureFiles() +
       _getTestFiles() +
       '});';
+
+    return content;
   }
 
   /**
