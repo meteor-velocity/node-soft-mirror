@@ -23,7 +23,7 @@ Package.on_use(function (api) {
       CLIENT = 'client',
       BOTH = [CLIENT, SERVER];
 
-  api.versionsFrom('METEOR@1.0');
+  api.versionsFrom('METEOR@1.0.3.2');
 
   api.use([
     'mongo@1.0.9',
@@ -34,6 +34,8 @@ Package.on_use(function (api) {
     'velocity:test-proxy@0.0.4'
   ]);
   api.use('practicalmeteor:loglevel@1.1.0_2', 'server');
+  api.use('sanjo:meteor-version@1.0.0', 'server')
+  api.use('package-version-parser', 'server')
 
   api.addFiles(['lib/meteor/files.js', 'lib/LongRunningChildProcess.coffee'], SERVER);
   api.addFiles(['lib/spawnScript.js'], 'server', {isAsset: true});

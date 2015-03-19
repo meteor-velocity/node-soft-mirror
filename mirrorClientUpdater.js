@@ -61,9 +61,14 @@ DEBUG = typeof process !== 'undefined' ? !!process.env.VELOCITY_DEBUG : false;
     } else {
 
       if (Meteor.isServer) {
+        var meteorVersion = MeteorVersion.getSemanticVersion();
+        var reloadSignal = (meteorVersion && PackageVersion.lessThan(meteorVersion, '1.0.4')) ?
+          'SIGUSR2' :
+          'SIGHUP'
+
         // listen to client restarts on the main process and signal all mirrors to reload the client
         // using DDP
-        process.on('SIGUSR2', Meteor.bindEnvironment(function () {
+        process.on(reloadSignal, Meteor.bindEnvironment(function () {
           DEBUG && console.log('[node-soft-mirror] Client restart detected');
           VelocityMirrors.find().forEach(function (mirror) {
             DEBUG && console.log('Signaling mirror to reload on:', mirror.host);
