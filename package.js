@@ -30,8 +30,7 @@ Package.on_use(function (api) {
     'coffeescript@1.0.4',
     'underscore',
     'velocity:core@0.4.5',
-    'velocity:shim@0.1.0',
-    'velocity:test-proxy@0.0.4'
+    'velocity:shim@0.1.0'
   ]);
   api.use('practicalmeteor:loglevel@1.1.0_2', 'server');
   api.use('sanjo:meteor-version@1.0.0', 'server')
