@@ -80,7 +80,11 @@ function _getFilesFromPackageJs (currentPackageJS) {
     if (line.indexOf('api.add_files') !== -1) {
       var relativePath = line.substring(line.indexOf('"') + 1, line.length);
       relativePath = relativePath.substring(0, relativePath.indexOf('"'));
-      absolutePaths.push(path.join(process.env.PWD, relativePath));
+      if (process.env.PWD) {
+        absolutePaths.push(path.join(process.env.PWD, relativePath));
+      } else {
+        absolutePaths.push(relativePath);
+      }
     }
   });
   return absolutePaths;
@@ -95,7 +99,11 @@ function _getProxyPackagePath () {
 }
 
 function _getPackagesPath () {
-  return path.join(process.env.PWD, 'packages');
+  if (process.env.PWD) {
+    return path.join(process.env.PWD, 'packages');
+  } else {
+    return 'packages';
+  }
 }
 
 function _getBlankPackageJsFile () {

@@ -149,7 +149,7 @@ Velocity.ProxyPackageSync = {};
     _.each(testFiles, function (testFile) {
       if (_shouldIncludeInMirror(testFile)) {
         DEBUG && console.log('[proxy-package-sync] Test file will be included in mirror', testFile.relativePath);
-        packageJsTestFileEntries += '\t' + 'api.add_files("' + testFile.relativePath + '",' + _getTarget(testFile) + ');' + '\n';
+        packageJsTestFileEntries += '\t' + 'api.add_files("' + testFile.relativePath.split(path.sep).join('/') + '",' + _getTarget(testFile) + ');' + '\n';
       } else {
         DEBUG && console.log('[proxy-package-sync] Test file will not be included in mirror', testFile.relativePath);
       }
